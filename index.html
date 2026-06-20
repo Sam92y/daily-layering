@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#070b1c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="daily layering">
+<title>daily layering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ecru:#e7ddc4; --paper:#f1ebd9; --paper2:#ece4cf;
+  --ink:#1e2436; --mut:#76705c; --line:#cfc4a6;
+  --night:#202a44; --night2:#2c3a63; --star:#eef2ff; --gold:#9c7b3a;
+  --max:1080px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--ecru);color:var(--ink);
+  font-family:"EB Garamond","Iowan Old Style",Georgia,serif;font-size:17px;line-height:1.55;
+  -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;min-height:100vh}
+
+/* ---- ciel nocturne + titre ---- */
+.hero{position:relative;overflow:hidden;text-align:center;
+  background:radial-gradient(135% 105% at 50% 125%, #1a2546 0%, #0b1330 40%, #060a1c 78%, #04060f 100%);
+  padding:64px 20px 58px;border-bottom:1px solid #04060f}
+.hero::after{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(50% 34% at 66% 24%, rgba(150,172,235,.09), transparent 74%);}
+#stars{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.hero h1{position:relative;font-family:"Syne","Helvetica Neue",sans-serif;font-weight:800;
+  color:#f1ecdd;font-size:clamp(30px,6vw,60px);line-height:1;letter-spacing:-.012em;
+  -webkit-text-stroke:1.7px #0a1230;paint-order:stroke fill;
+  text-shadow:0 2px 16px rgba(4,8,20,.5)}
+
+/* ---- fil de discussion ---- */
+#chat{flex:1 1 auto;padding:26px 20px 10px}
+.wrap{max-width:var(--max);margin:0 auto}
+.msg{display:flex;margin:0 0 22px;gap:12px}
+.msg.me{justify-content:flex-end}
+.bubble{max-width:min(900px,94%);background:var(--paper);border:1px solid var(--line);
+  border-radius:16px;padding:16px 18px;box-shadow:0 1px 0 rgba(255,255,255,.4) inset}
+.bubble.full{max-width:100%;width:100%}
+.msg.me .bubble{background:var(--night);border-color:#33406a;color:#ede8d8}
+.me .thumb{width:116px;height:148px;object-fit:cover;border-radius:12px;display:block}
+.me .cap{font-size:13px;color:#c8c2ae;margin-top:6px;text-align:right;font-style:italic}
+.bubble p{margin:0}
+b{font-weight:600}
+
+.detected{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.detected .pair{display:flex;gap:9px;align-items:center}
+.sw-lg{width:52px;height:52px;border-radius:10px;border:1px solid rgba(0,0,0,.18)}
+.detected .arrow{color:var(--mut);font-size:22px}
+.detected .lab{font-size:14px;color:var(--mut)}
+.detected .lab b{color:var(--ink);font-size:21px;font-weight:600;display:block;
+  font-family:"Cormorant Garamond",serif;line-height:1.1}
+.alts{font-size:14px;color:var(--mut);margin:10px 0 0;font-style:italic}
+.alts b{color:var(--ink);font-style:normal}
+.count{margin:16px 0 14px;font-family:"Cormorant Garamond",serif;font-size:24px;color:var(--ink);
+  border-top:1px solid var(--line);padding-top:14px}
+.count .o{font-size:13px;color:var(--mut);font-family:"EB Garamond",serif;font-style:italic;margin-left:6px}
+
+.combos{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:16px}
+.combo{background:var(--paper2);border:1px solid var(--line);border-radius:14px;padding:13px}
+.combo .no{font-family:"Cormorant Garamond",serif;font-size:18px;color:var(--mut);margin-bottom:9px}
+.combo-body{display:flex;gap:12px}
+.stack{width:62px;flex:0 0 auto;display:flex;flex-direction:column;height:188px;
+  border-radius:9px;overflow:hidden;border:1px solid rgba(0,0,0,.22)}
+.stack .band{flex:1 1 0;position:relative}
+.stack .band.hit::after{content:"";position:absolute;inset:4px;border:2px solid rgba(255,255,255,.9);
+  border-radius:5px;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.names{flex:1 1 auto;display:flex;flex-direction:column;justify-content:center;gap:7px}
+.cn{display:flex;align-items:baseline;gap:7px;font-size:15px}
+.cn .nm{font-weight:500}
+.cn .hx{color:var(--mut);font-size:12px;letter-spacing:.03em;margin-left:auto}
+.cn.hit .nm{color:var(--gold);font-weight:600}
+.cn.hit .tag{font-size:11px;color:var(--gold);font-style:italic}
+
+.compagnons{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.compagnons h4{font-family:"Cormorant Garamond",serif;font-size:20px;color:var(--ink);margin-bottom:10px;font-weight:600}
+.palette{display:flex;flex-wrap:wrap;gap:8px}
+.pchip{width:34px;height:34px;border-radius:8px;border:1px solid rgba(0,0,0,.18)}
+
+/* ---- barre ---- */
+footer{position:sticky;bottom:0;flex:0 0 auto;border-top:1px solid var(--line);
+  padding:12px 20px calc(12px + env(safe-area-inset-bottom));background:var(--ecru)}
+.bar-in{max-width:var(--max);margin:0 auto;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--paper)}
+.seg button{border:none;background:transparent;font-family:inherit;font-size:15px;padding:9px 14px;cursor:pointer;color:var(--mut)}
+.seg button.on{background:var(--night);color:#f1ecdd}
+.btn{display:inline-flex;align-items:center;gap:8px;background:var(--night);color:#f3eede;
+  font-family:"Cormorant Garamond",serif;font-weight:600;font-size:18px;border:none;border-radius:10px;
+  padding:10px 18px;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.hint{color:var(--mut);font-size:14px;font-style:italic}
+.drop{position:fixed;inset:0;background:rgba(20,24,46,.86);border:3px dashed #b9c4ec;
+  display:none;align-items:center;justify-content:center;z-index:50;color:#f1ecdd;
+  font-family:"Cormorant Garamond",serif;font-size:30px}
+.drop.on{display:flex}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--mut);border-top-color:var(--ink);
+  border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px;margin-right:7px}
+@keyframes s{to{transform:rotate(360deg)}}
+@media(max-width:520px){.combos{grid-template-columns:1fr 1fr}.stack{width:48px;height:160px}.names{display:none}}
+</style>
+</head>
+<body>
+
+<div class="hero"><svg id="stars" preserveAspectRatio="none"></svg><h1>Daily Layering</h1></div>
+
+<main id="chat"><div class="wrap" id="thread"></div></main>
+
+<footer>
+  <div class="bar-in">
+    <button class="btn" id="pick">Ajouter une photo</button>
+    <span class="seg" id="seg">
+      <button data-o="haut" class="on">Haut</button><button data-o="bas">Bas</button>
+    </span>
+    <span class="hint">glisse-dépose ou colle une image. La pièce détectée se place en haut (haut) ou en bas (bas) de l'accord.</span>
+    <input type="file" id="file" accept="image/*" hidden>
+  </div>
+</footer>
+
+<div class="drop" id="drop">Dépose ta photo</div>
+
+<script>
+const WADA = {"colors":{"1":{"n":"Hermosa Pink","h":"#ffb3f0","c":[176,227,273]},"2":{"n":"Corinthian Pink","h":"#ffa6d9","c":[27,43,87,97,128,169,174,206,246,254,264,342]},"3":{"n":"Cameo Pink","h":"#e6adcf","c":[18,125,308]},"4":{"n":"Fawn","h":"#d1b0b3","c":[18,125,308]},"5":{"n":"Light Brown Drab","h":"#b08699","c":[35,68,185,191,223,239,244,268,285,321]},"6":{"n":"Coral Red","h":"#ff7399","c":[92,123,320,332]},"7":{"n":"Fresh Color","h":"#ff788c","c":[240]},"8":{"n":"Grenadine Pink","h":"#ff616b","c":[6,21,112,166,193,201,230,300,315,341]},"9":{"n":"Eosine Pink","h":"#ff5ec4","c":[34,59,90,108,134,153,197,242,248,276,287,314,327,336]},"10":{"n":"Spinel Red","h":"#ff4dc9","c":[14,147,165,184,195,224,277]},"11":{"n":"Old Rose","h":"#d94d99","c":[55,162,260,265]},"12":{"n":"Eugenia Red | A","h":"#ed3d66","c":[284]},"13":{"n":"Eugenia Red | B","h":"#e62e73","c":[17,77,252,262,270,280,282,325]},"14":{"n":"Raw Sienna","h":"#b85e00","c":[3,13,33,70,86,130,131,182,243,247,252,255,268,269,279,293,298,319,327]},"15":{"n":"Vinaceous Tawny","h":"#c74300","c":[40,85,244]},"16":{"n":"Jasper Red","h":"#fa2b00","c":[155,194,216,219]},"17":{"n":"Spectrum Red","h":"#f20000","c":[257,266,301,322]},"18":{"n":"Red Orange","h":"#e81900","c":[31,164,179,241,264]},"19":{"n":"Etruscan Red","h":"#c9303e","c":[25,47,97,137,152,185,275]},"20":{"n":"Burnt Sienna","h":"#a93400","c":[198,242,263,285,286,297,312,333,343]},"21":{"n":"Ochre Red","h":"#a7374b","c":[199,283]},"22":{"n":"Scarlet","h":"#d50c42","c":[136,308,332]},"23":{"n":"Carmine","h":"#d60036","c":[39,117,122,154,225,232,307,313]},"24":{"n":"Indian Lake","h":"#cc1a97","c":[299,331]},"25":{"n":"Rosolanc Purple","h":"#b319ab","c":[48,144,170,204,277]},"26":{"n":"Pomegranite Purple","h":"#b90078","c":[220,271]},"27":{"n":"Hydrangea Red","h":"#9e194d","c":[142]},"28":{"n":"Brick Red","h":"#a32100","c":[37,108,246,322,328]},"29":{"n":"Carmine Red","h":"#a10b2b","c":[35,51,104,130,181,200,221,228,233,237,245]},"30":{"n":"Pompeian Red","h":"#a90636","c":[30,71,120,212,311,324]},"31":{"n":"Red","h":"#a10045","c":[251,261]},"32":{"n":"Brown","h":"#6c2b11","c":[110,121,145,161]},"33":{"n":"Hay's Russet","h":"#681916","c":[58,82,95,152,186,231,249,304,314,336,345]},"34":{"n":"Vandyke Red","h":"#740909","c":[16,133,147,316,335]},"35":{"n":"Pansy Purple","h":"#6f0043","c":[157,273]},"36":{"n":"Pale Burnt Lake","h":"#730f1f","c":[124,171,177,205,217,258,269,283]},"37":{"n":"Violet Red","h":"#3d0079","c":[9]},"38":{"n":"Vistoris Lake","h":"#5c2c45","c":[63,91,165,226,290,337]},"39":{"n":"Sulpher Yellow","h":"#f5f5b8","c":[52,72,80,104,132,135,151,208,246,254,270,294,296,310,315,320,321,326]},"40":{"n":"Pale Lemon Yellow","h":"#fff59e","c":[3,31,60,76,99,109,111,169,185,195,203,228,241,261,272,281,290,292,336]},"41":{"n":"Naples Yellow","h":"#faed8f","c":[14,115,166,193,303,325]},"42":{"n":"Ivory Buff","h":"#ebd999","c":[11,50,94,102,126,178,184,190,209,214,235,243,262,266,301,343]},"43":{"n":"Seashell Pink","h":"#ffcfc4","c":[45,84,88,113,150,176,194,276,334]},"44":{"n":"Light Pinkish Cinnamon","h":"#ffbf99","c":[317]},"45":{"n":"Pinkish Cinnamon","h":"#f2ad78","c":[78,175,232,258,263,292,305,310]},"46":{"n":"Cinnamon Buff","h":"#ffbf6e","c":[23,127,137,180,210,234,246,323,344]},"47":{"n":"Cream Yellow","h":"#ffb852","c":[122,192,215,226,267,278,294,295,300,302,304,311,329,342]},"48":{"n":"Golden Yellow","h":"#fa9442","c":[26,81,132,138,140,179]},"49":{"n":"Vinaceous Cinnamon","h":"#f59994","c":[203,205,213,256,260,279,299]},"50":{"n":"Ochraceous Salmon","h":"#d99e73","c":[32,71,121,186,217,220,223,238,296,339]},"51":{"n":"Isabella Color","h":"#c3a55c","c":[4,12,241,292]},"52":{"n":"Maple","h":"#c2975a","c":[282]},"53":{"n":"Olive Buff","h":"#bcd382","c":[83,175,200,330,348]},"54":{"n":"Ecru","h":"#c0b490","c":[167,249,275,279,292,302,317,327]},"55":{"n":"Yellow","h":"#ffff00","c":[22,62,68,154,240,251,295,313]},"56":{"n":"Lemon Yellow","h":"#f2ff26","c":[45,123,138,158,168,173,189,210,253,259,289,298,306,317,333]},"57":{"n":"Apricot Yellow","h":"#ffe600","c":[107,129,163,198,213,247,265,284,305,319]},"58":{"n":"Pyrite Yellow","h":"#c4bf33","c":[239,250,255,287]},"59":{"n":"Olive Ocher","h":"#d1bd19","c":[66,148,149,156,157,249,278]},"60":{"n":"Yellow Ocher","h":"#e0b81f","c":[42,96,118,124,126,191,222,325]},"61":{"n":"Orange Yellow","h":"#ffab00","c":[114,148,153,164,170,257,286,338]},"62":{"n":"Yellow Orange","h":"#ff8c00","c":[22,53,89,151,171,209,222,235,267,288,297,312,319,335]},"63":{"n":"Apricot Orange","h":"#ff7340","c":[211,253,309,328]},"64":{"n":"Orange","h":"#ff5200","c":[7,46,141,144,149,256,272]},"65":{"n":"Peach Red","h":"#ff3319","c":[115,250,274,285,298,303,326,340]},"66":{"n":"English Red","h":"#de4500","c":[1,131,190,308,339]},"67":{"n":"Cinnamon Rufous","h":"#c2612c","c":[8,10,103,158,172,204,206]},"68":{"n":"Orange Rufous","h":"#c05200","c":[91,102,222]},"69":{"n":"Sulphine Yellow","h":"#baa600","c":[36,65,142,160,252]},"70":{"n":"Khaki","h":"#b68400","c":[129,146,159,236,248]},"71":{"n":"Citron Yellow","h":"#a6d40d","c":[59,93,132,133,262]},"72":{"n":"Buffy Citrine","h":"#888d2a","c":[100,177,233]},"73":{"n":"Dark Citrine","h":"#7e8743","c":[10,41,274,304]},"74":{"n":"Light Grayish Olive","h":"#76844e","c":[107,184]},"75":{"n":"Krongbergs Green","h":"#759243","c":[29]},"76":{"n":"Olive","h":"#718600","c":[96,201,254,258,277,310,334]},"77":{"n":"Orange Citrine","h":"#8c6510","c":[212,342]},"78":{"n":"Sudan Brown","h":"#9b5348","c":[207,214,273]},"79":{"n":"Olive Green","h":"#58771e","c":[66,243,270,297]},"80":{"n":"Light Brownish Olive","h":"#706934","c":[199,318]},"81":{"n":"Deep Grayish Olive","h":"#505423","c":[146,343]},"82":{"n":"Pale Raw Umber","h":"#5e4017","c":[26,73,160,234,296]},"83":{"n":"Sepia","h":"#503d00","c":[24,288]},"84":{"n":"Madder Brown","h":"#651300","c":[28,79,98,173,237,275,323]},"85":{"n":"Mars Brown / Tobacco","h":"#522000","c":[19]},"86":{"n":"Vandyke Brown","h":"#362304","c":[110,113,118,182,192]},"87":{"n":"Turquoise Green","h":"#b5ffc2","c":[36,74,147,163,173,202,223,230,263,272,285,293,300,305,317,346]},"88":{"n":"Glaucous Green","h":"#b3e8c2","c":[7,150,171,207,239,260]},"89":{"n":"Dark Greenish Glaucous","h":"#b3d9a3","c":[264,311]},"90":{"n":"Yellow Green","h":"#a6ff47","c":[111,141,276,326,334]},"91":{"n":"Light Green Yellow","h":"#bdf226","c":[61,289,291,311,346]},"92":{"n":"Night Green","h":"#7aff00","c":[19,32,158,326]},"93":{"n":"Olive Yellow","h":"#99b333","c":[124,211,265,347]},"94":{"n":"Artemesia Green","h":"#65a98f","c":[293,312]},"95":{"n":"Andover Green","h":"#5c8a73","c":[244,346]},"96":{"n":"Rainette Green","h":"#85b857","c":[105,200,219,283]},"97":{"n":"Pistachio Green","h":"#56aa69","c":[127,237]},"98":{"n":"Sea Green","h":"#33ff7d","c":[17,21,58,86,133,250,260,284,291,340,347]},"99":{"n":"Benzol Green","h":"#00d973","c":[15,54,92,122,155,247,266,267,281,304,306]},"100":{"n":"Light Porcelain Green","h":"#23c17c","c":[44,193,328]},"101":{"n":"Green","h":"#40c945","c":[198,216,293]},"102":{"n":"Dull Viridian Green","h":"#19cc33","c":[136,256,306,316]},"103":{"n":"Oil Green","h":"#6ea900","c":[245,299,320]},"104":{"n":"Diamine Green","h":"#1b8e13","c":[38,146,217,242,251,313]},"105":{"n":"Cossack Green","h":"#328e13","c":[5,135,262,270,278,294,319,341,348]},"106":{"n":"Lincoln Green","h":"#405416","c":[70,121,203,210,280,290]},"107":{"n":"Blackish Olive","h":"#324e2a","c":[109,318,336]},"108":{"n":"Deep Slate Olive","h":"#172713","c":[189,229,268,303,310,321,332,341,342,348]},"109":{"n":"Nile Blue","h":"#bfffe6","c":[25,250,268,302,306,330,345]},"110":{"n":"Pale King's Blue","h":"#abf5ed","c":[16,49,72,75,167,196,213,234,287]},"111":{"n":"Light Glaucous Blue","h":"#a6e6db","c":[54,93,119,152,178,204,227,320,339,341]},"112":{"n":"Salvia Blue","h":"#96bfe6","c":[29,129,135,139,142,188,209,212,237,272,294,321,330]},"113":{"n":"Cobalt Green","h":"#94ff94","c":[156,188,201,202,230,271,281,282,290,291,308,333]},"114":{"n":"Calamine BLue","h":"#80ffcc","c":[20,41,65,159,176,255,261,287,291,300]},"115":{"n":"Venice Green","h":"#6bffb3","c":[78,128,138,189,283,345]},"116":{"n":"Cerulian Blue","h":"#29bdad","c":[1,63,99,125,148,227,240,264]},"117":{"n":"Peacock Blue","h":"#00cf91","c":[131,286]},"118":{"n":"Green Blue","h":"#2dbc94","c":[12,74,79,178,208,252,259,271,330]},"119":{"n":"Olympic Blue","h":"#4f8fe6","c":[44,67,157,194,231,274,324]},"120":{"n":"Blue","h":"#0d75ff","c":[49,51,88,143,154,186,191,215,257,267,295,333]},"121":{"n":"Antwarp Blue","h":"#008aa1","c":[85,106,114,140,163,172,208,244,258,281,299,302,334]},"122":{"n":"Helvetia Blue","h":"#0057ba","c":[39,48,161,187,218,259,312,347]},"123":{"n":"Dark Medici Blue","h":"#417777","c":[160,224,241,249]},"124":{"n":"Dusky Green","h":"#00592e","c":[94,219,225,278,284,318,332,338]},"125":{"n":"Deep Lyons Blue","h":"#0024cc","c":[22,38,101,126,179,199,236,247,314,344]},"126":{"n":"Violet Blue","h":"#202d85","c":[75,83,89,98,125,233,286,289,297,309,339]},"127":{"n":"Vandar Poel's Blue","h":"#003e83","c":[]},"128":{"n":"Dark Tyrian Blue","h":"#0d2b52","c":[2,60,67,119,141,245,279]},"129":{"n":"Dull Violet Black","h":"#06004f","c":[95,106,145,265,277,289,295,331]},"130":{"n":"Deep Indigo","h":"#000831","c":[6,28,139,155,182,211,232]},"131":{"n":"Deep Slate Green","h":"#0f261f","c":[84,149,166,271,318,325]},"132":{"n":"Grayish Lavender - A","h":"#b8b8ff","c":[8,15,159,177,218,248,307]},"133":{"n":"Grayish Lavender - B","h":"#bfabcc","c":[47,56,174,187,235,327,329,338]},"134":{"n":"Laelia Pink","h":"#cc85d1","c":[20,254,280,337]},"135":{"n":"Lilac","h":"#b875eb","c":[143,162,282,347]},"136":{"n":"Eupatorium Purple","h":"#bf36e0","c":[23,80,128,134,180,274,331]},"137":{"n":"Light Mauve","h":"#9161f2","c":[23,80,128,134,180,274,331]},"138":{"n":"Aconite Violet","h":"#9c52f2","c":[43,64,90,187,220,257,269,301,307,324,344]},"139":{"n":"Dull Blue Violet","h":"#6e66d4","c":[9,100]},"140":{"n":"Dark Soft Violet","h":"#4d52de","c":[64,127,197]},"141":{"n":"Blue Violet","h":"#4733ff","c":[116,175,196,322,345]},"142":{"n":"Purple Drab","h":"#754260","c":[236]},"143":{"n":"Deep Violet / Plumbeous","h":"#5c7287","c":[183,192,218]},"144":{"n":"Veronia Purple","h":"#7e3075","c":[13,24,168,183]},"145":{"n":"Dark Slate Purple","h":"#53225c","c":[225,248]},"146":{"n":"Taupe Brown","h":"#6b2e63","c":[57,123,174,224,275,280,288]},"147":{"n":"Violet Carmine","h":"#531745","c":[337]},"148":{"n":"Violet","h":"#2619d1","c":[42,56,130,156,164,181,205,214,226,316,331,335]},"149":{"n":"Red Violet","h":"#3400a3","c":[4,37,134,136,170,172,183,316]},"150":{"n":"Cotinga Purple","h":"#340059","c":[61,181,238,253,307,329,348]},"151":{"n":"Dusky Madder Violet","h":"#2d0060","c":[18,50,53,82,103,314]},"152":{"n":"White","h":"#ffffff","c":[55]},"153":{"n":"Neutral Gray","h":"#b5d1cc","c":[34,139,180,195,197,221,228,229,273,303,324,340]},"154":{"n":"Mineral Gray","h":"#9fc2b2","c":[11,30]},"155":{"n":"Warm Gray","h":"#9cb29e","c":[69,76,81,143,169,238,259,261]},"156":{"n":"Slate Color","h":"#1b3644","c":[27,33,57,140,202,243,245,251,253,263,296,329,335]},"157":{"n":"Black","h":"#000000","c":[46,52,62,69,112,117,144,190,198,207,216,221,242,255,256,269,276,288,313,323,337,340,344]}},"combos":{"176":[1,43,114],"227":[1,111,116],"273":[1,35,78,153],"27":[2,156],"43":[2,138],"87":[2],"97":[2,19],"128":[2,115,136,137],"169":[2,40,155],"174":[2,133,146],"206":[2,67],"246":[2,28,39,46],"254":[2,39,76,134],"264":[2,18,89,116],"342":[2,47,77,108],"18":[3,4,151],"125":[3,4,116,126],"308":[3,4,22,66,113],"35":[5,29],"68":[5,55],"185":[5,19,40],"191":[5,60,120],"223":[5,50,87],"239":[5,58,88],"244":[5,15,95,121],"268":[5,14,108,109],"285":[5,20,65,87],"321":[5,39,108,112],"92":[6,99],"123":[6,56,146],"320":[6,39,103,111],"332":[6,22,108,124],"240":[7,55,116],"6":[8,130],"21":[8,98],"112":[8,157],"166":[8,41,131],"193":[8,41,100],"201":[8,76,113],"230":[8,87,113],"300":[8,47,87,114],"315":[8,39],"341":[8,105,108,111],"34":[9,153],"59":[9,71],"90":[9,138],"108":[9,28],"134":[9,136,137,149],"153":[9,61],"197":[9,140,153],"242":[9,20,104,157],"248":[9,70,132,145],"276":[9,43,90,157],"287":[9,58,110,114],"314":[9,33,125,151],"327":[9,14,54,133],"336":[9,33,40,107],"14":[10,41],"147":[10,34,87],"165":[10,38],"184":[10,42,74],"195":[10,40,153],"224":[10,123,146],"277":[10,25,76,129],"55":[11,152],"162":[11,135],"260":[11,49,88,98],"265":[11,57,93,129],"284":[12,57,98,124],"17":[13,98],"77":[13],"252":[13,14,69,118],"262":[13,42,71,105],"270":[13,39,79,105],"280":[13,106,134,146],"282":[13,52,113,135],"325":[13,41,60,131],"3":[14,40],"13":[14,144],"33":[14,156],"70":[14,106],"86":[14,98],"130":[14,29,148],"131":[14,66,117],"182":[14,86,130],"243":[14,42,79,156],"247":[14,57,99,125],"255":[14,58,114,157],"269":[14,36,138,157],"279":[14,49,54,128],"293":[14,87,94,101],"298":[14,56,65],"319":[14,57,62,105],"40":[15],"85":[15,121],"155":[16,99,130],"194":[16,43,119],"216":[16,101,157],"219":[16,96,124],"257":[17,61,120,138],"266":[17,42,99],"301":[17,42,138],"322":[17,28,141],"31":[18,40],"164":[18,61,148],"179":[18,48,125],"241":[18,40,51,123],"25":[19,109],"47":[19,133],"137":[19,46],"152":[19,33,111],"275":[19,54,84,146],"198":[20,57,101,157],"263":[20,45,87,156],"286":[20,61,117,126],"297":[20,62,79,126],"312":[20,62,94,122],"333":[20,56,113,120],"343":[20,42,81],"199":[21,80,125],"283":[21,36,96,115],"136":[22,102,149],"39":[23,122],"117":[23,157],"122":[23,47,99],"154":[23,55,120],"225":[23,124,145],"232":[23,45,130],"307":[23,132,138,150],"313":[23,55,104,157],"299":[24,49,103,121],"331":[24,129,136,137,148],"48":[25,122],"144":[25,64,157],"170":[25,61,149],"204":[25,67,111],"220":[26,50,138],"271":[26,113,118,131],"142":[27,69,112],"37":[28,149],"328":[28,63,100],"51":[29,120],"104":[29,39],"181":[29,148,150],"200":[29,53,96],"221":[29,153,157],"228":[29,40,153],"233":[29,72,126],"237":[29,84,97,112],"245":[29,103,128,156],"30":[30,154],"71":[30,50],"120":[30],"212":[30,77,112],"311":[30,47,89,91],"324":[30,119,138,153],"251":[31,55,104,156],"261":[31,40,114,155],"110":[32,86],"121":[32,50,106],"145":[32,129],"161":[32,122],"58":[33,98],"82":[33,151],"95":[33,129],"186":[33,50,120],"231":[33,119],"249":[33,54,59,123],"304":[33,47,73,99],"345":[33,109,115,141],"16":[34,110],"133":[34,71,98],"316":[34,102,148,149],"335":[34,62,148,156],"157":[35,59,119],"124":[36,60,93],"171":[36,62,88],"177":[36,72,132],"205":[36,49,148],"217":[36,50,104],"258":[36,45,76,121],"9":[37,139],"63":[38,116],"91":[38,68],"226":[38,47,148],"290":[38,40,106,113],"337":[38,134,147,157],"52":[39,157],"72":[39,110],"80":[39,136,137],"132":[39,48,71],"135":[39,105,112],"151":[39,62],"208":[39,118,121],"294":[39,47,105,112],"296":[39,50,82,156],"310":[39,45,76,108],"326":[39,65,90,92],"60":[40,128],"76":[40,155],"99":[40,116],"109":[40,107],"111":[40,90],"203":[40,49,106],"272":[40,64,87,112],"281":[40,99,113,121],"292":[40,45,51,54],"115":[41,65],"303":[41,65,108,153],"11":[42,154],"50":[42,151],"94":[42,124],"102":[42,68],"126":[42,60,125],"178":[42,111,118],"190":[42,66,157],"209":[42,62,112],"214":[42,78,148],"235":[42,62,133],"45":[43,56],"84":[43,131],"88":[43,120],"113":[43,86],"150":[43,88],"334":[43,76,90,121],"317":[44,54,56,87],"78":[45,115],"175":[45,53,141],"305":[45,57,87],"23":[46,136,137],"127":[46,97,140],"180":[46,136,137,153],"210":[46,56,106],"234":[46,82,110],"323":[46,84,157],"344":[46,125,138,157],"192":[47,86,143],"215":[47,120],"267":[47,62,99,120],"278":[47,59,105,124],"295":[47,55,120,129],"302":[47,54,109,121],"329":[47,133,150,156],"26":[48,82],"81":[48,155],"138":[48,56,115],"140":[48,121,156],"213":[49,57,110],"256":[49,64,102,157],"32":[50,92],"238":[50,150,155],"339":[50,66,111,126],"4":[51,149],"12":[51,118],"83":[53,126],"330":[53,109,112,118],"348":[53,105,108,150],"167":[54,110],"22":[55,62,125],"62":[55,157],"158":[56,67,92],"168":[56,144],"173":[56,84,87],"189":[56,108,115],"253":[56,63,150,156],"259":[56,118,122,155],"289":[56,91,126,129],"306":[56,99,102,109],"107":[57,74],"129":[57,70,112],"163":[57,87,121],"250":[58,65,98,109],"66":[59,79],"148":[59,61,116],"149":[59,64,131],"156":[59,113,148],"42":[60,148],"96":[60,76],"118":[60,86],"222":[60,62,68],"114":[61,121],"338":[61,124,133],"53":[62,151],"89":[62,126],"288":[62,83,146,157],"211":[63,93,130],"309":[63,126],"7":[64,88],"46":[64,157],"141":[64,90,128],"274":[65,73,119,136,137],"340":[65,98,153,157],"1":[66,116],"8":[67,132],"10":[67,73],"103":[67,151],"172":[67,121,149],"36":[69,87],"65":[69,114],"160":[69,82,123],"146":[70,81,104],"159":[70,114,132],"236":[70,125,142],"93":[71,111],"100":[72,139],"41":[73,114],"29":[75,112],"207":[78,88,157],"318":[80,107,124,131],"73":[82],"24":[83,144],"28":[84,130],"79":[84,118],"98":[84,126],"19":[85,92],"74":[87,118],"202":[87,113,156],"346":[87,91,95],"61":[91,150],"291":[91,98,113,114],"347":[93,98,122,135],"105":[96],"15":[99,132],"54":[99,111],"44":[100,119],"38":[104,125],"5":[105],"229":[108,153],"49":[110,120],"75":[110,126],"196":[110,141],"119":[111,128],"139":[112,130,153],"188":[112,113],"20":[114,134],"67":[119,128],"143":[120,135,155],"106":[121,129],"187":[122,133,138],"218":[122,132,143],"101":[125],"2":[128],"56":[133,148],"64":[138,140],"116":[141],"183":[143,144,149],"57":[146,156],"69":[155,157]}};
+const COLORS = WADA.colors, COMBOS = WADA.combos;
+let ORIENT = 'haut';
+let last = null; // {url, rgb, el}
+
+// ---- étoiles ----
+(function(){const svg=document.getElementById('stars');let h='';
+  // poussière d'étoiles : minuscules paillettes de lumière
+  for(let i=0;i<140;i++){const x=(Math.random()*100).toFixed(2),y=(Math.random()*100).toFixed(2),
+    r=(Math.random()*0.55+0.22).toFixed(2),o=(Math.random()*0.75+0.18).toFixed(2);
+    h+=`<circle cx="${x}%" cy="${y}%" r="${r}" fill="#f4f7ff" opacity="${o}"/>`;}
+  // quelques éclats plus vifs avec un léger halo
+  for(let i=0;i<9;i++){const x=(Math.random()*100).toFixed(2),y=(Math.random()*74).toFixed(2);
+    h+=`<circle cx="${x}%" cy="${y}%" r="3" fill="#bcd0ff" opacity="0.10"/>`+
+       `<circle cx="${x}%" cy="${y}%" r="0.85" fill="#ffffff" opacity="0.95"/>`;}
+  svg.innerHTML=h;})();
+
+// ---- couleur ----
+function hexToRgb(h){h=h.replace('#','');return {r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};}
+function toHex(r,g,b){const f=v=>('0'+Math.max(0,Math.min(255,Math.round(v))).toString(16)).slice(-2);return '#'+f(r)+f(g)+f(b);}
+function srgb(v){v/=255;return v<=0.04045?v/12.92:Math.pow((v+0.055)/1.055,2.4);}
+function rgb2lab(r,g,b){const R=srgb(r),G=srgb(g),B=srgb(b);
+  let X=R*0.4124+G*0.3576+B*0.1805,Y=R*0.2126+G*0.7152+B*0.0722,Z=R*0.0193+G*0.1192+B*0.9505;
+  X/=0.95047;Z/=1.08883;const f=t=>t>0.008856?Math.cbrt(t):7.787*t+16/116;
+  const fx=f(X),fy=f(Y),fz=f(Z);return [116*fy-16,500*(fx-fy),200*(fy-fz)];}
+function deltaE(a,b){return Math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2);}
+const LAB={};for(const i in COLORS){const c=hexToRgb(COLORS[i].h);LAB[i]=rgb2lab(c.r,c.g,c.b);}
+function nearest(rgb){const lab=rgb2lab(rgb.r,rgb.g,rgb.b);const a=[];
+  for(const i in COLORS)a.push({i:+i,d:deltaE(lab,LAB[i])});a.sort((x,y)=>x.d-y.d);return a;}
+function dominant(img){const W=120,H=Math.max(1,Math.round(W*img.height/img.width));
+  const cv=document.createElement('canvas');cv.width=W;cv.height=H;const ctx=cv.getContext('2d');
+  ctx.drawImage(img,0,0,W,H);const d=ctx.getImageData(0,0,W,H).data;
+  const x0=Math.floor(W*0.17),x1=Math.ceil(W*0.83),y0=Math.floor(H*0.17),y1=Math.ceil(H*0.83);const bk={};
+  for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){const i=(y*W+x)*4;if(d[i+3]<200)continue;
+    const r=d[i],g=d[i+1],b=d[i+2];const k=(r>>4)+'_'+(g>>4)+'_'+(b>>4);
+    const o=bk[k]||(bk[k]={n:0,r:0,g:0,b:0});o.n++;o.r+=r;o.g+=g;o.b+=b;}
+  let best=null;for(const k in bk)if(!best||bk[k].n>best.n)best=bk[k];
+  return best?{r:best.r/best.n,g:best.g/best.n,b:best.b/best.n}:{r:128,g:128,b:128};}
+
+// ---- rendu ----
+const thread=document.getElementById('thread'),chat=document.getElementById('chat');
+function add(html,me){const m=document.createElement('div');m.className='msg'+(me?' me':'');
+  m.innerHTML='<div class="bubble'+(me?'':' full')+'">'+html+'</div>';thread.appendChild(m);
+  chat.scrollTop=chat.scrollHeight;return m;}
+function esc(s){return (s+'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+function ordered(ids,hit){const others=ids.filter(i=>i!==hit);
+  return ORIENT==='haut'?[hit,...others]:[...others,hit];}
+
+function comboCard(id,hit){
+  const seq=ordered(COMBOS[id]||[],hit);
+  const bands=seq.map(i=>`<div class="band${i===hit?' hit':''}" style="background:${COLORS[i].h}"></div>`).join('');
+  const names=seq.map(i=>`<div class="cn${i===hit?' hit':''}"><span class="nm">${esc(COLORS[i].n)}</span>${i===hit?'<span class="tag">ta pièce</span>':''}<span class="hx">${COLORS[i].h.toUpperCase()}</span></div>`).join('');
+  return `<div class="combo"><div class="no">N° ${id}</div><div class="combo-body"><div class="stack">${bands}</div><div class="names">${names}</div></div></div>`;
+}
+
+function buildResult(rgb){
+  const ranked=nearest(rgb),top=ranked[0],m=COLORS[top.i];
+  const alts=ranked.slice(1,4).map(x=>`<b>${esc(COLORS[x.i].n)}</b>`).join(', ');
+  const detHex=toHex(rgb.r,rgb.g,rgb.b);
+  const combos=(m.c||[]).slice().sort((a,b)=>a-b);
+  const comp=new Set();combos.forEach(id=>(COMBOS[id]||[]).forEach(i=>{if(i!==top.i)comp.add(i);}));
+  const palette=[...comp].map(i=>`<span class="pchip" style="background:${COLORS[i].h}" title="${esc(COLORS[i].n)}"></span>`).join('');
+  let html=`<div class="detected">
+    <div class="pair"><span class="sw-lg" style="background:${detHex}"></span><span class="lab">détecté<br>${detHex.toUpperCase()}</span></div>
+    <span class="arrow">→</span>
+    <div class="pair"><span class="sw-lg" style="background:${m.h}"></span><span class="lab">teinte Wada<b>${esc(m.n)}</b>${m.h.toUpperCase()}</span></div>
+  </div>
+  <div class="alts">aussi proche de : ${alts}</div>
+  <div class="count">${combos.length} accord${combos.length>1?'s':''}<span class="o">pièce en ${ORIENT}</span></div>
+  <div class="combos">${combos.map(id=>comboCard(id,top.i)).join('')}</div>`;
+  if(palette)html+=`<div class="compagnons"><h4>Toutes les couleurs qui s'accordent</h4><div class="palette">${palette}</div></div>`;
+  return html;
+}
+function showResult(rgb){const el=add(buildResult(rgb),false);return el;}
+
+function handleFile(file){
+  if(!file||!file.type.startsWith('image/'))return;
+  const url=URL.createObjectURL(file);
+  add(`<img class="thumb" src="${url}"><div class="cap">ma pièce · ${ORIENT}</div>`,true);
+  const loading=add('<span class="spin"></span>lecture de la couleur…',false);
+  const img=new Image();
+  img.onload=()=>{const rgb=dominant(img);loading.remove();const el=showResult(rgb);last={url,rgb,el};};
+  img.onerror=()=>{loading.querySelector('.bubble').innerHTML='Image illisible — réessaie.';};
+  img.src=url;
+}
+
+document.getElementById('pick').onclick=()=>document.getElementById('file').click();
+document.getElementById('file').onchange=e=>{handleFile(e.target.files[0]);e.target.value='';};
+
+// toggle haut/bas (réordonne le dernier résultat aussi)
+document.getElementById('seg').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b)return;
+  ORIENT=b.dataset.o;[...e.currentTarget.children].forEach(x=>x.classList.toggle('on',x===b));
+  if(last){const fresh=document.createElement('div');fresh.className='msg';
+    fresh.innerHTML='<div class="bubble full">'+buildResult(last.rgb)+'</div>';
+    last.el.replaceWith(fresh);last.el=fresh;}
+});
+
+const drop=document.getElementById('drop');let dc=0;
+window.addEventListener('dragenter',e=>{e.preventDefault();dc++;drop.classList.add('on');});
+window.addEventListener('dragover',e=>e.preventDefault());
+window.addEventListener('dragleave',()=>{dc--;if(dc<=0)drop.classList.remove('on');});
+window.addEventListener('drop',e=>{e.preventDefault();dc=0;drop.classList.remove('on');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
+window.addEventListener('paste',e=>{const it=[...((e.clipboardData||{}).items||[])].find(x=>x.type.startsWith('image/'));if(it)handleFile(it.getAsFile());});
+
+add(`Dépose la <b>photo d'une pièce</b>. Je lis sa couleur, je trouve la teinte la plus proche dans le <b>dictionnaire de Sanzo Wada</b> (157 couleurs · 348 accords), et je montre tous les accords — la pièce placée en <b>haut</b> ou en <b>bas</b> selon le sélecteur, pour imaginer le reste de la tenue.`,false);
+</script>
+</body>
+</html>
