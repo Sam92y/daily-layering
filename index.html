@@ -92,7 +92,7 @@ b{font-weight:600}
 .combo{background:var(--paper2);border:1px solid var(--line);border-radius:14px;padding:13px}
 .combo .no{font-family:"Schibsted Grotesk",serif;font-size:18px;color:var(--mut);margin-bottom:9px}
 .combo-body{display:flex;gap:12px;align-items:center}
-.fit{width:58px;flex:0 0 auto;align-self:center}
+.fit{width:66px;flex:0 0 auto;align-self:center}
 .fitsvg{width:100%;height:auto;display:block}
 .stack{width:62px;flex:0 0 auto;display:flex;flex-direction:column;height:188px;
   border-radius:9px;overflow:hidden;border:1px solid rgba(0,0,0,.22)}
@@ -246,15 +246,31 @@ function esc(s){return (s+'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':
 function ordered(ids,hit){const others=ids.filter(i=>i!==hit);
   return ORIENT==='haut'?[hit,...others]:[...others,hit];}
 
-// petit bonhomme portant la pièce envoyée (couleur) + le vêtement complémentaire
-function fitFigure(topHex,botHex){
-  const ink='#11183a';
-  return `<svg class="fitsvg" viewBox="0 0 92 198" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="46" cy="16" r="10.5" fill="#efe7d6" stroke="${ink}" stroke-width="1.5"/>
-    <path d="M40 27 q6 4 12 0" fill="none" stroke="${ink}" stroke-width="1.5"/>
-    <path d="M30 40 L21 50 L26 74 L34 67 L34 112 L58 112 L58 67 L66 74 L71 50 L62 40 Q46 51 30 40 Z" fill="${topHex}" stroke="${ink}" stroke-width="1.5" stroke-linejoin="round"/>
-    <path d="M34 112 H58 L55 186 L46.5 186 L46 140 L45.5 186 L37 186 Z" fill="${botHex}" stroke="${ink}" stroke-width="1.5" stroke-linejoin="round"/>
-    <ellipse cx="41" cy="189" rx="6.5" ry="3.2" fill="${ink}"/><ellipse cx="51" cy="189" rx="6.5" ry="3.2" fill="${ink}"/>
+function shade(hex,f){let h=hex.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');
+  let r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
+  if(f>=0){r+=(255-r)*f;g+=(255-g)*f;b+=(255-b)*f;}else{r*=1+f;g*=1+f;b*=1+f;}
+  const x=v=>('0'+Math.round(Math.max(0,Math.min(255,v))).toString(16)).slice(-2);return '#'+x(r)+x(g)+x(b);}
+
+// bonhomme soigné (style lookbook) : tête + cheveux marine, haut boxy à manches,
+// pantalon large 3 panneaux, sneakers. topHex/botHex = pièce + complémentaire ; shoeHex 3e couleur.
+function fitFigure(topHex,botHex,shoeHex){
+  const skin='#d8b48f',hair='#23314f';
+  const te=shade(topHex,-0.14),be=shade(botHex,-0.13),bm=shade(botHex,-0.1),cuff=shade(topHex,0.14),se=shade(shoeHex,-0.18);
+  return `<svg class="fitsvg" viewBox="0 0 120 232" xmlns="http://www.w3.org/2000/svg">
+    <path d="M42 54 Q26 82 24 112" stroke="${te}" stroke-width="17" fill="none" stroke-linecap="round"/>
+    <path d="M42 54 Q26 82 24 112" stroke="${topHex}" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <path d="M78 54 Q94 82 96 112" stroke="${te}" stroke-width="17" fill="none" stroke-linecap="round"/>
+    <path d="M78 54 Q94 82 96 112" stroke="${topHex}" stroke-width="14" fill="none" stroke-linecap="round"/>
+    <circle cx="24" cy="113" r="7.5" fill="${cuff}"/><circle cx="96" cy="113" r="7.5" fill="${cuff}"/>
+    <path d="M36 130 H84 V204 Q84 213 75 213 H45 Q36 213 36 204 Z" fill="${botHex}" stroke="${be}" stroke-width="2" stroke-linejoin="round"/>
+    <rect x="52" y="132" width="16" height="79" fill="${bm}"/>
+    <path d="M60 150 V211" stroke="${be}" stroke-width="1.6"/>
+    <rect x="33" y="212" width="25" height="14" rx="6.5" fill="${shoeHex}" stroke="${se}" stroke-width="1.5"/>
+    <rect x="62" y="212" width="25" height="14" rx="6.5" fill="${shoeHex}" stroke="${se}" stroke-width="1.5"/>
+    <path d="M37 56 Q37 48 45 48 H75 Q83 48 83 56 L83 134 L37 134 Z" fill="${topHex}" stroke="${te}" stroke-width="2" stroke-linejoin="round"/>
+    <path d="M52 50 Q60 57 68 50" fill="none" stroke="${te}" stroke-width="2"/>
+    <ellipse cx="60" cy="30" rx="25" ry="15" fill="${hair}"/>
+    <circle cx="60" cy="23" r="15" fill="${skin}"/>
   </svg>`;
 }
 function comboCard(id,hit){
@@ -263,8 +279,9 @@ function comboCard(id,hit){
   const names=seq.map(i=>`<div class="cn${i===hit?' hit':''}"><span class="nm">${esc(COLORS[i].n)}</span>${i===hit?'<span class="tag">ta pièce</span>':''}<span class="hx">${COLORS[i].h.toUpperCase()}</span></div>`).join('');
   const comp=(COMBOS[id]||[]).filter(i=>i!==hit);
   const hitHex=COLORS[hit].h, compHex=comp.length?COLORS[comp[0]].h:hitHex;
+  const shoeHex=comp.length>1?COLORS[comp[1]].h:'#b39a6e';
   const topHex=ORIENT==='haut'?hitHex:compHex, botHex=ORIENT==='haut'?compHex:hitHex;
-  return `<div class="combo"><div class="no">N° ${id}</div><div class="combo-body"><div class="stack">${bands}</div><div class="names">${names}</div><div class="fit">${fitFigure(topHex,botHex)}</div></div></div>`;
+  return `<div class="combo"><div class="no">N° ${id}</div><div class="combo-body"><div class="stack">${bands}</div><div class="names">${names}</div><div class="fit">${fitFigure(topHex,botHex,shoeHex)}</div></div></div>`;
 }
 
 function detPalette(a,idx){
