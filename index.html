@@ -109,6 +109,9 @@ b{font-weight:600}
 .cnav{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:14px}
 .counter{font-size:14px;color:var(--mut);letter-spacing:.05em;min-width:88px;text-align:center}
 .btn.nav{padding:8px 18px;font-size:20px;line-height:1;min-width:54px}
+.modes{display:flex;border:1px solid var(--line);border-radius:11px;overflow:hidden;width:fit-content;margin:16px 0 2px;background:var(--paper)}
+.mtab{border:none;background:transparent;font-family:inherit;font-size:14px;padding:9px 17px;cursor:pointer;color:var(--mut)}
+.mtab.on{background:var(--night);color:#f1ecdd}
 .stack{width:62px;flex:0 0 auto;display:flex;flex-direction:column;height:188px;
   border-radius:9px;overflow:hidden;border:1px solid rgba(0,0,0,.22)}
 .stack .band{flex:1 1 0;position:relative}
@@ -199,6 +202,23 @@ const LAB={},CHROMA={};for(const i in COLORS){const c=hexToRgb(COLORS[i].h);LAB[
 function nearest(rgb){const lab=rgb2lab(rgb.r,rgb.g,rgb.b),cin=Math.hypot(lab[1],lab[2]);const a=[];
   for(const i in COLORS)a.push({i:+i,d:deltaE(lab,LAB[i])+1.8*Math.abs(cin-CHROMA[i])});
   a.sort((x,y)=>x.d-y.d);return a;}
+
+let MODE='livre';
+function rgbHue(r,g,b){r/=255;g/=255;b/=255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn;if(!d)return 0;
+  let h;if(mx===r)h=((g-b)/d+6)%6;else if(mx===g)h=(b-r)/d+2;else h=(r-g)/d+4;return ((h*60)%360+360)%360;}
+const HUE={};for(const i in COLORS){const c=hexToRgb(COLORS[i].h);HUE[i]=rgbHue(c.r,c.g,c.b);}
+function hueDist(a,b){const d=Math.abs(a-b)%360;return Math.min(d,360-d);}
+function colorAtHue(h,excl,minC){let best=null;for(const i in COLORS){const k=+i;if(excl.indexOf(k)>=0)continue;
+  if(CHROMA[k]<(minC||20))continue;const dh=hueDist(HUE[k],h);if(!best||dh<best.dh)best={k,dh};}return best?best.k:null;}
+// harmonies generees (theorie des couleurs) sur les 157 couleurs Wada — "plus de combinaisons", sommees au livre
+function generatedAccords(hit){const out=[],h0=HUE[hit];
+  if(CHROMA[hit]<14){const used=[hit];[35,95,160,215,275,330].forEach(h=>{const k=colorAtHue(h,used,22);if(k!=null){out.push({ids:[hit,k],label:'Neutre + accent'});used.push(k);}});return out;}
+  const mk=(label,targets)=>{const ids=[hit];targets.forEach(t=>{const k=colorAtHue(t,ids,18);if(k!=null)ids.push(k);});if(ids.length>1)out.push({ids,label});};
+  mk('Complémentaire',[(h0+180)%360]);
+  mk('Analogue',[(h0+32)%360,(h0+328)%360]);
+  mk('Triade',[(h0+120)%360,(h0+240)%360]);
+  mk('Split-complémentaire',[(h0+150)%360,(h0+210)%360]);
+  return out;}
 // k-means RGB (centres + effectifs)
 function kmeans(pts,k,iters){
   if(!pts.length)return{centers:[[128,128,128]],counts:[0]};
@@ -290,16 +310,18 @@ function fitFigure(topHex,botHex,shoeHex){
     <path d="M45 20 Q60 4 75 20 Q60 13 45 20 Z" fill="#5b4a3a"/>
   </svg>`;
 }
-function comboCard(id,hit){
-  const seq=ordered(COMBOS[id]||[],hit);
+function comboCardFromIds(ids,hit,label){
+  ids=ids||[];
+  const seq=ordered(ids,hit);
   const bands=seq.map(i=>`<div class="band${i===hit?' hit':''}" style="background:${COLORS[i].h}"></div>`).join('');
   const names=seq.map(i=>`<div class="cn${i===hit?' hit':''}"><span class="nm">${esc(COLORS[i].n)}</span>${i===hit?'<span class="tag">ta pièce</span>':''}<span class="hx">${COLORS[i].h.toUpperCase()}</span></div>`).join('');
-  const comp=(COMBOS[id]||[]).filter(i=>i!==hit);
+  const comp=ids.filter(i=>i!==hit);
   const hitHex=COLORS[hit].h, compHex=comp.length?COLORS[comp[0]].h:hitHex;
   const shoeHex=comp.length>1?COLORS[comp[1]].h:'#b39a6e';
   const topHex=ORIENT==='haut'?hitHex:compHex, botHex=ORIENT==='haut'?compHex:hitHex;
-  return `<div class="combo"><div class="no">N° ${id}</div><div class="combo-body"><div class="stack">${bands}</div><div class="names">${names}</div><div class="fit">${fitFigure(topHex,botHex,shoeHex)}</div></div></div>`;
+  return `<div class="combo"><div class="no">${esc(label)}</div><div class="combo-body"><div class="stack">${bands}</div><div class="names">${names}</div><div class="fit">${fitFigure(topHex,botHex,shoeHex)}</div></div></div>`;
 }
+function comboCard(id,hit){return comboCardFromIds(COMBOS[id]||[],hit,'N° '+id);}
 
 function detPalette(a,idx){
   if(a.colors.length<2)return '';
@@ -311,8 +333,9 @@ function buildAnalysisHTML(a,idx){
   const ranked=nearest(rgb),top=ranked[0],m=COLORS[top.i];
   const alts=ranked.slice(1,4).map(x=>`<b>${esc(COLORS[x.i].n)}</b>`).join(', ');
   const detHex=toHex(rgb.r,rgb.g,rgb.b);
-  const combos=(m.c||[]).slice().sort((x,y)=>x-y);
-  const comp=new Set();combos.forEach(id=>(COMBOS[id]||[]).forEach(i=>{if(i!==top.i)comp.add(i);}));
+  const book=(m.c||[]).slice().sort((x,y)=>x-y).map(id=>({ids:COMBOS[id]||[],label:'N° '+id}));
+  const accords=MODE==='etendu'?generatedAccords(top.i).concat(book):book;
+  const comp=new Set();accords.forEach(ac=>ac.ids.forEach(i=>{if(i!==top.i)comp.add(i);}));
   const palette=[...comp].map(i=>`<span class="pchip" style="background:${COLORS[i].h}" title="${esc(COLORS[i].n)}"></span>`).join('');
   const head=a.cutoutURL
     ? `<div class="found"><img class="cutout" src="${a.cutoutURL}" alt="vêtement isolé"><div><div class="foundt">vêtement isolé <span class="src">(IA)</span> · <b>${ORIENT}</b></div>${detPalette(a,idx)}</div></div>`
@@ -324,14 +347,16 @@ function buildAnalysisHTML(a,idx){
       <div class="pair"><span class="sw-lg" style="background:${m.h}"></span><span class="lab">teinte Wada<b>${esc(m.n)}</b>${m.h.toUpperCase()}</span></div>
     </div>
     <div class="alts">aussi proche de : ${alts}</div>
-    <div class="count">${combos.length} accord${combos.length>1?'s':''}<span class="o">pièce en ${ORIENT}</span></div>
+    <div class="modes"><button class="mtab${MODE==='livre'?' on':''}" data-m="livre">Dictionnaire</button><button class="mtab${MODE==='etendu'?' on':''}" data-m="etendu">Harmonies étendues</button></div>
+    <div class="count">${accords.length} accord${accords.length>1?'s':''}<span class="o">${MODE==='etendu'?'livre + harmonies · ':''}pièce en ${ORIENT}</span></div>
     <div class="carousel">
-      <div class="slides">${combos.map(id=>`<div class="slide">${comboCard(id,top.i)}</div>`).join('')}<div class="slide recap"><div class="recap-in"><div class="recapt">Récap</div><p class="recapd">Ta pièce <b>${esc(m.n)}</b> entre dans <b>${combos.length}</b> accord${combos.length>1?'s':''} du dictionnaire. Toutes les couleurs compatibles :</p><div class="palette">${palette}</div></div></div></div>
-      <div class="cnav"><button class="btn nav" data-dir="-1" aria-label="précédent">←</button><span class="counter">1 / ${combos.length}</span><button class="btn nav" data-dir="1" aria-label="suivant">→</button></div>
+      <div class="slides">${accords.map(ac=>`<div class="slide">${comboCardFromIds(ac.ids,top.i,ac.label)}</div>`).join('')}<div class="slide recap"><div class="recap-in"><div class="recapt">Récap</div><p class="recapd">Ta pièce <b>${esc(m.n)}</b> entre dans <b>${accords.length}</b> accord${accords.length>1?'s':''}${MODE==='etendu'?' (dictionnaire + harmonies)':' du dictionnaire'}. Toutes les couleurs compatibles :</p><div class="palette">${palette}</div></div></div></div>
+      <div class="cnav"><button class="btn nav" data-dir="-1" aria-label="précédent">←</button><span class="counter">1 / ${accords.length}</span><button class="btn nav" data-dir="1" aria-label="suivant">→</button></div>
     </div>`;
   return html;
 }
 function wireChips(el){el.querySelectorAll('.dchip').forEach(ch=>ch.onclick=()=>{last.idx=+ch.dataset.idx;rerender();});
+  el.querySelectorAll('.mtab').forEach(b=>b.onclick=()=>{MODE=b.dataset.m;rerender();});
   const sl=el.querySelector('.slides');if(sl){const cnt=el.querySelector('.counter'),N=sl.children.length;
     el.querySelectorAll('.nav').forEach(b=>b.onclick=()=>sl.scrollBy({left:(+b.dataset.dir)*(sl.clientWidth||320),behavior:'smooth'}));
     const upd=()=>{const w=sl.clientWidth||1,i=Math.round(sl.scrollLeft/w);cnt.textContent=i>=N-1?'Récap':((i+1)+' / '+(N-1));};
