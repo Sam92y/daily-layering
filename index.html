@@ -94,6 +94,21 @@ b{font-weight:600}
 .combo-body{display:flex;gap:12px;align-items:center}
 .fit{width:66px;flex:0 0 auto;align-self:center}
 .fitsvg{width:100%;height:auto;display:block}
+.carousel{margin-top:4px}
+.slides{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.slides::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:center;padding:6px 4px;min-width:0;display:flex}
+.slide>.combo{width:100%;max-width:560px;margin:0 auto}
+.slide .stack{height:230px}
+.slide .fit{width:106px}
+.slide.recap{align-items:center;justify-content:center}
+.recap-in{width:100%;max-width:560px;text-align:center;padding:18px 8px}
+.recapt{font-family:"Schibsted Grotesk",sans-serif;font-size:27px;font-weight:500;letter-spacing:.03em;margin-bottom:10px}
+.recapd{color:var(--mut);max-width:48ch;margin:0 auto 16px;font-size:15px}
+.recap .palette{justify-content:center}
+.cnav{display:flex;align-items:center;justify-content:center;gap:18px;margin-top:14px}
+.counter{font-size:14px;color:var(--mut);letter-spacing:.05em;min-width:88px;text-align:center}
+.btn.nav{padding:8px 18px;font-size:20px;line-height:1;min-width:54px}
 .stack{width:62px;flex:0 0 auto;display:flex;flex-direction:column;height:188px;
   border-radius:9px;overflow:hidden;border:1px solid rgba(0,0,0,.22)}
 .stack .band{flex:1 1 0;position:relative}
@@ -179,9 +194,11 @@ function rgb2lab(r,g,b){const R=srgb(r),G=srgb(g),B=srgb(b);
   X/=0.95047;Z/=1.08883;const f=t=>t>0.008856?Math.cbrt(t):7.787*t+16/116;
   const fx=f(X),fy=f(Y),fz=f(Z);return [116*fy-16,500*(fx-fy),200*(fy-fz)];}
 function deltaE(a,b){return Math.sqrt((a[0]-b[0])**2+(a[1]-b[1])**2+(a[2]-b[2])**2);}
-const LAB={};for(const i in COLORS){const c=hexToRgb(COLORS[i].h);LAB[i]=rgb2lab(c.r,c.g,c.b);}
-function nearest(rgb){const lab=rgb2lab(rgb.r,rgb.g,rgb.b);const a=[];
-  for(const i in COLORS)a.push({i:+i,d:deltaE(lab,LAB[i])});a.sort((x,y)=>x.d-y.d);return a;}
+const LAB={},CHROMA={};for(const i in COLORS){const c=hexToRgb(COLORS[i].h);LAB[i]=rgb2lab(c.r,c.g,c.b);CHROMA[i]=Math.hypot(LAB[i][1],LAB[i][2]);}
+// distance perceptuelle + forte penalite d'ecart de CHROMA : un gris matche un gris (pas un marine), un ton vif matche un ton vif
+function nearest(rgb){const lab=rgb2lab(rgb.r,rgb.g,rgb.b),cin=Math.hypot(lab[1],lab[2]);const a=[];
+  for(const i in COLORS)a.push({i:+i,d:deltaE(lab,LAB[i])+1.8*Math.abs(cin-CHROMA[i])});
+  a.sort((x,y)=>x.d-y.d);return a;}
 // k-means RGB (centres + effectifs)
 function kmeans(pts,k,iters){
   if(!pts.length)return{centers:[[128,128,128]],counts:[0]};
@@ -254,7 +271,7 @@ function shade(hex,f){let h=hex.replace('#','');if(h.length===3)h=h.split('').ma
 // bonhomme soigné (style lookbook) : tête + cheveux marine, haut boxy à manches,
 // pantalon large 3 panneaux, sneakers. topHex/botHex = pièce + complémentaire ; shoeHex 3e couleur.
 function fitFigure(topHex,botHex,shoeHex){
-  const skin='#d8b48f',hair='#23314f';
+  const skin='#d8b48f';
   const te=shade(topHex,-0.14),be=shade(botHex,-0.13),bm=shade(botHex,-0.1),cuff=shade(topHex,0.14),se=shade(shoeHex,-0.18);
   return `<svg class="fitsvg" viewBox="0 0 120 232" xmlns="http://www.w3.org/2000/svg">
     <path d="M42 54 Q26 82 24 112" stroke="${te}" stroke-width="17" fill="none" stroke-linecap="round"/>
@@ -269,8 +286,8 @@ function fitFigure(topHex,botHex,shoeHex){
     <rect x="62" y="212" width="25" height="14" rx="6.5" fill="${shoeHex}" stroke="${se}" stroke-width="1.5"/>
     <path d="M37 56 Q37 48 45 48 H75 Q83 48 83 56 L83 134 L37 134 Z" fill="${topHex}" stroke="${te}" stroke-width="2" stroke-linejoin="round"/>
     <path d="M52 50 Q60 57 68 50" fill="none" stroke="${te}" stroke-width="2"/>
-    <ellipse cx="60" cy="30" rx="25" ry="15" fill="${hair}"/>
-    <circle cx="60" cy="23" r="15" fill="${skin}"/>
+    <circle cx="60" cy="24" r="15" fill="${skin}"/>
+    <path d="M45 20 Q60 4 75 20 Q60 13 45 20 Z" fill="#5b4a3a"/>
   </svg>`;
 }
 function comboCard(id,hit){
@@ -308,11 +325,17 @@ function buildAnalysisHTML(a,idx){
     </div>
     <div class="alts">aussi proche de : ${alts}</div>
     <div class="count">${combos.length} accord${combos.length>1?'s':''}<span class="o">pièce en ${ORIENT}</span></div>
-    <div class="combos">${combos.map(id=>comboCard(id,top.i)).join('')}</div>`;
-  if(palette)html+=`<div class="compagnons"><h4>Toutes les couleurs qui s'accordent</h4><div class="palette">${palette}</div></div>`;
+    <div class="carousel">
+      <div class="slides">${combos.map(id=>`<div class="slide">${comboCard(id,top.i)}</div>`).join('')}<div class="slide recap"><div class="recap-in"><div class="recapt">Récap</div><p class="recapd">Ta pièce <b>${esc(m.n)}</b> entre dans <b>${combos.length}</b> accord${combos.length>1?'s':''} du dictionnaire. Toutes les couleurs compatibles :</p><div class="palette">${palette}</div></div></div></div>
+      <div class="cnav"><button class="btn nav" data-dir="-1" aria-label="précédent">←</button><span class="counter">1 / ${combos.length}</span><button class="btn nav" data-dir="1" aria-label="suivant">→</button></div>
+    </div>`;
   return html;
 }
-function wireChips(el){el.querySelectorAll('.dchip').forEach(ch=>ch.onclick=()=>{last.idx=+ch.dataset.idx;rerender();});}
+function wireChips(el){el.querySelectorAll('.dchip').forEach(ch=>ch.onclick=()=>{last.idx=+ch.dataset.idx;rerender();});
+  const sl=el.querySelector('.slides');if(sl){const cnt=el.querySelector('.counter'),N=sl.children.length;
+    el.querySelectorAll('.nav').forEach(b=>b.onclick=()=>sl.scrollBy({left:(+b.dataset.dir)*(sl.clientWidth||320),behavior:'smooth'}));
+    const upd=()=>{const w=sl.clientWidth||1,i=Math.round(sl.scrollLeft/w);cnt.textContent=i>=N-1?'Récap':((i+1)+' / '+(N-1));};
+    sl.addEventListener('scroll',upd);upd();}}
 function rerender(){if(!last||!last.el)return;last.el.innerHTML=buildAnalysisHTML(last.a,last.idx);wireChips(last.el);}
 function syncSeg(){[...document.getElementById('seg').children].forEach(x=>x.classList.toggle('on',x.dataset.o===ORIENT));}
 
