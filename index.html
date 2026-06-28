@@ -22,7 +22,7 @@
 html,body{height:100%}
 body{background:var(--ecru);color:var(--ink);
   font-family:"Schibsted Grotesk","Helvetica Neue",Arial,sans-serif;font-size:16px;line-height:1.55;
-  -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;min-height:100vh}
+  -webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100dvh;overflow:hidden}
 
 /* ---- ciel nocturne + titre ---- */
 .hero{position:relative;overflow:hidden;text-align:center;
@@ -42,8 +42,8 @@ body{background:var(--ecru);color:var(--ink);
   text-shadow:0 2px 18px rgba(4,8,44,.5);animation:rise 1s cubic-bezier(.2,.7,.2,1) both}
 @keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 
-/* ---- fil de discussion ---- */
-#chat{flex:1 1 auto;padding:26px 20px 10px}
+/* ---- app shell ---- */
+#app{flex:1 1 auto;position:relative;overflow:hidden;display:flex}
 .wrap{max-width:var(--max);margin:0 auto}
 .msg{display:flex;margin:0 0 22px;gap:12px}
 .msg.me{justify-content:flex-end}
@@ -169,21 +169,54 @@ footer{position:sticky;bottom:0;flex:0 0 auto;border-top:1px solid var(--line);
   border-radius:50%;animation:s .8s linear infinite;vertical-align:-2px;margin-right:7px}
 @keyframes s{to{transform:rotate(360deg)}}
 @media(max-width:520px){.combos{grid-template-columns:1fr}.slide .fit{width:90px}.slide .cnm{font-size:16px}.cw{width:32px;height:32px}}
+
+/* ===== refonte plein écran, zéro scroll ===== */
+.view{position:absolute;inset:0;display:flex;flex-direction:column;animation:fade .4s ease both}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.idle{align-items:center;justify-content:center;text-align:center;gap:16px;padding:24px}
+.idle .big{font-family:"EB Garamond",Georgia,serif;font-size:clamp(22px,4.6vw,32px);max-width:20ch;line-height:1.22}
+.idle .sub{color:var(--mut);font-style:italic;font-size:15px;max-width:34ch}
+.picker{padding:14px 16px}
+.pstage{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center}
+.pcanvas{max-width:100%;max-height:100%;width:auto;height:auto}
+.pickbar{flex:0 0 auto;justify-content:center;margin-top:0;padding-top:12px}
+.result{padding:10px 16px 6px}
+.resbar{flex:0 0 auto;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.res-id{display:flex;align-items:center;gap:9px;min-width:0}
+.res-sw{width:30px;height:30px;border-radius:8px;border:1px solid rgba(0,0,0,.18);flex:0 0 auto}
+.res-nm{font-family:"EB Garamond",Georgia,serif;font-size:19px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:42vw}
+.res-meta{font-size:12px;color:var(--mut);font-style:italic}
+.dchips{display:inline-flex;gap:6px}
+.dchip{width:24px;height:24px;border-radius:7px;border:1px solid rgba(0,0,0,.2);cursor:pointer}
+.dchip.on{outline:2px solid var(--klein);outline-offset:2px}
+.modes{margin:0 0 0 auto}
+.carousel{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;margin-top:8px}
+.slides{flex:1 1 auto;min-height:0;overflow-y:hidden}
+.slide{flex:0 0 100%;display:flex;flex-direction:column;padding:8px 4px;overflow:hidden}
+.slide .no{font-family:"Schibsted Grotesk",sans-serif;font-size:14px;color:var(--mut);letter-spacing:.05em;flex:0 0 auto;margin:0 0 8px}
+.slide .ribbon{flex:0 0 auto;height:24px;margin:0 0 12px}
+.cardrow{flex:1 1 auto;min-height:0;display:flex;gap:16px;align-items:center}
+.figwrap{flex:0 0 42%;max-width:200px;height:100%;display:flex;align-items:center;justify-content:center}
+.figwrap .fitsvg{max-width:100%;max-height:100%;height:auto;width:auto;filter:drop-shadow(0 16px 26px rgba(16,20,60,.18))}
+.clist{flex:1 1 auto;min-width:0;justify-content:center}
+.crow{padding:6px 0;gap:11px;grid-template-columns:30px 1fr auto}
+.cw{width:30px;height:30px}
+.slide .cnm{font-size:16px}
+.slide.recap{align-items:center;justify-content:center;text-align:center}
+.resnav{flex:0 0 auto;display:flex;align-items:center;justify-content:center;gap:16px;padding:8px 0 2px}
+@media(max-width:520px){.figwrap{flex-basis:40%;max-width:148px}.slide .cnm{font-size:15px}.res-nm{font-size:17px;max-width:38vw}}
 </style>
 </head>
 <body>
 
 <div class="hero"><svg id="stars" preserveAspectRatio="none"></svg><h1>Daily Layering</h1></div>
 
-<main id="chat"><div class="wrap" id="thread"></div></main>
+<main id="app"></main>
 
 <footer>
   <div class="bar-in">
     <button class="btn" id="pick">Ajouter une photo</button>
-    <span class="seg" id="seg">
-      <button data-o="haut" class="on">Haut</button><button data-o="bas">Bas</button>
-    </span>
-    <span class="hint">glisse-dépose ou colle une image. La pièce détectée se place en haut (haut) ou en bas (bas) de l'accord.</span>
+    <span class="seg" id="seg"><button data-o="haut" class="on">Haut</button><button data-o="bas">Bas</button></span>
     <input type="file" id="file" accept="image/*" hidden>
   </div>
 </footer>
@@ -293,15 +326,10 @@ function analyzeFromSeg(res,img){
   const cc=document.createElement('canvas');cc.width=W;cc.height=H;cc.getContext('2d').putImageData(cut,0,0);
   return{colors,orient,cutoutURL:cc.toDataURL(),label:best.r.label};}
 
-// ---- rendu ----
-const thread=document.getElementById('thread'),chat=document.getElementById('chat');
-function add(html,me){const m=document.createElement('div');m.className='msg'+(me?' me':'');
-  m.innerHTML='<div class="bubble'+(me?'':' full')+'">'+html+'</div>';thread.appendChild(m);
-  chat.scrollTop=chat.scrollHeight;return m;}
+// ---- vues plein écran (remplacent le contenu — aucun scroll vertical) ----
+const app=document.getElementById('app');
 function esc(s){return (s+'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-
-function ordered(ids,hit){const others=ids.filter(i=>i!==hit);
-  return ORIENT==='haut'?[hit,...others]:[...others,hit];}
+function ordered(ids,hit){const o=ids.filter(i=>i!==hit);return ORIENT==='haut'?[hit,...o]:[...o,hit];}
 
 function shade(hex,f){let h=hex.replace('#','');if(h.length===3)h=h.split('').map(c=>c+c).join('');
   let r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);
@@ -330,115 +358,69 @@ function fitFigure(topHex,botHex,shoeHex){
     <path d="M45 20 Q60 4 75 20 Q60 13 45 20 Z" fill="#5b4a3a"/>
   </svg>`;
 }
-function comboCardFromIds(ids,hit,label){
-  ids=ids||[];
-  const seq=ordered(ids,hit);
+function slideCard(ids,hit,label){
+  const seq=ordered(ids||[],hit);
   const ribbon=seq.map(i=>`<span style="background:${COLORS[i].h}"></span>`).join('');
   const rows=seq.map(i=>`<div class="crow${i===hit?' hit':''}"><span class="cw" style="background:${COLORS[i].h}"></span><span class="cnm">${esc(COLORS[i].n)}${i===hit?'<span class="tag">ta pièce</span>':''}</span><span class="chx">${COLORS[i].h.toUpperCase()}</span></div>`).join('');
-  const comp=ids.filter(i=>i!==hit);
-  const hitHex=COLORS[hit].h, compHex=comp.length?COLORS[comp[0]].h:hitHex;
-  const shoeHex=comp.length>1?COLORS[comp[1]].h:'#b39a6e';
-  const topHex=ORIENT==='haut'?hitHex:compHex, botHex=ORIENT==='haut'?compHex:hitHex;
-  return `<div class="combo"><div class="no">${esc(label)}</div><div class="ribbon">${ribbon}</div><div class="combo-body"><div class="clist">${rows}</div><div class="fit">${fitFigure(topHex,botHex,shoeHex)}</div></div></div>`;
+  const comp=(ids||[]).filter(i=>i!==hit);
+  const hitHex=COLORS[hit].h,compHex=comp.length?COLORS[comp[0]].h:hitHex,shoeHex=comp.length>1?COLORS[comp[1]].h:'#b39a6e';
+  const topHex=ORIENT==='haut'?hitHex:compHex,botHex=ORIENT==='haut'?compHex:hitHex;
+  return `<div class="slide"><div class="no">${esc(label)}</div><div class="ribbon">${ribbon}</div><div class="cardrow"><div class="figwrap">${fitFigure(topHex,botHex,shoeHex)}</div><div class="clist">${rows}</div></div></div>`;
 }
-function comboCard(id,hit){return comboCardFromIds(COMBOS[id]||[],hit,'N° '+id);}
+function accordsFor(top){const book=(COLORS[top].c||[]).slice().sort((x,y)=>x-y).map(id=>({ids:COMBOS[id]||[],label:'N° '+id}));
+  return MODE==='etendu'?generatedAccords(top).concat(book):book;}
 
-function detPalette(a,idx){
-  if(a.colors.length<2)return '';
-  const chips=a.colors.map((c,k)=>`<span class="dchip${k===idx?' on':''}" data-idx="${k}" title="${Math.round(c.frac*100)}%" style="background:${toHex(c.r,c.g,c.b)}"></span>`).join('');
-  return `<div class="detrow"><span class="dlab">couleurs du vêtement</span>${chips}<span class="dhint">clique pour changer</span></div>`;
+function renderResult(){
+  const a=last.a,idx=last.idx,rgb=a.colors[idx];
+  const top=nearest(rgb)[0].i,m=COLORS[top];
+  const accords=accordsFor(top);
+  const cs=new Set();accords.forEach(ac=>ac.ids.forEach(i=>{if(i!==top)cs.add(i);}));
+  const palette=[...cs].map(i=>`<span class="pchip" style="background:${COLORS[i].h}" title="${esc(COLORS[i].n)}"></span>`).join('');
+  const slides=accords.map(ac=>slideCard(ac.ids,top,ac.label)).join('')
+    +`<div class="slide recap"><div><div class="recapt">Récap</div><p class="recapd">Ta pièce <b>${esc(m.n)}</b> entre dans <b>${accords.length}</b> accord${accords.length>1?'s':''}${MODE==='etendu'?' (livre + harmonies)':''}. Toutes les couleurs compatibles :</p><div class="palette">${palette}</div></div></div>`;
+  const chips=a.colors.length>1?`<span class="dchips">${a.colors.map((c,k)=>`<span class="dchip${k===idx?' on':''}" data-idx="${k}" style="background:${toHex(c.r,c.g,c.b)}"></span>`).join('')}</span>`:'';
+  app.innerHTML=`<div class="view result">
+    <div class="resbar"><div class="res-id"><span class="res-sw" style="background:${m.h}"></span><span class="res-nm">${esc(m.n)}</span></div>${chips}<span class="res-meta">${accords.length} accords · ${ORIENT}</span>
+      <div class="modes"><button class="mtab${MODE==='livre'?' on':''}" data-m="livre">Dictionnaire</button><button class="mtab${MODE==='etendu'?' on':''}" data-m="etendu">Harmonies</button></div></div>
+    <div class="carousel"><div class="slides">${slides}</div></div>
+    <div class="resnav"><button class="btn nav" data-dir="-1" aria-label="précédent">←</button><span class="counter">1 / ${accords.length}</span><button class="btn nav" data-dir="1" aria-label="suivant">→</button></div>
+  </div>`;
+  app.querySelectorAll('.mtab').forEach(b=>b.onclick=()=>{MODE=b.dataset.m;renderResult();});
+  app.querySelectorAll('.dchip').forEach(ch=>ch.onclick=()=>{last.idx=+ch.dataset.idx;renderResult();});
+  const sl=app.querySelector('.slides'),cnt=app.querySelector('.counter'),N=sl.children.length;
+  app.querySelectorAll('.nav').forEach(b=>b.onclick=()=>sl.scrollBy({left:(+b.dataset.dir)*(sl.clientWidth||320),behavior:'smooth'}));
+  const upd=()=>{const w=sl.clientWidth||1,i=Math.round(sl.scrollLeft/w);cnt.textContent=i>=N-1?'Récap':((i+1)+' / '+(N-1));};
+  sl.addEventListener('scroll',upd);upd();
 }
-function buildAnalysisHTML(a,idx){
-  const rgb=a.colors[idx];
-  const ranked=nearest(rgb),top=ranked[0],m=COLORS[top.i];
-  const alts=ranked.slice(1,4).map(x=>`<b>${esc(COLORS[x.i].n)}</b>`).join(', ');
-  const detHex=toHex(rgb.r,rgb.g,rgb.b);
-  const book=(m.c||[]).slice().sort((x,y)=>x-y).map(id=>({ids:COMBOS[id]||[],label:'N° '+id}));
-  const accords=MODE==='etendu'?generatedAccords(top.i).concat(book):book;
-  const comp=new Set();accords.forEach(ac=>ac.ids.forEach(i=>{if(i!==top.i)comp.add(i);}));
-  const palette=[...comp].map(i=>`<span class="pchip" style="background:${COLORS[i].h}" title="${esc(COLORS[i].n)}"></span>`).join('');
-  const head=a.cutoutURL
-    ? `<div class="found"><img class="cutout" src="${a.cutoutURL}" alt="vêtement isolé"><div><div class="foundt">vêtement isolé <span class="src">(IA)</span> · <b>${ORIENT}</b></div>${detPalette(a,idx)}</div></div>`
-    : `<div class="found nocut"><div class="foundt">couleur touchée <span class="src">(toi)</span> · <b>${ORIENT}</b></div>${detPalette(a,idx)}</div>`;
-  let html=head+`
-    <div class="detected">
-      <div class="pair"><span class="sw-lg" style="background:${detHex}"></span><span class="lab">couleur<br>${detHex.toUpperCase()}</span></div>
-      <span class="arrow">→</span>
-      <div class="pair"><span class="sw-lg" style="background:${m.h}"></span><span class="lab">teinte Wada<b>${esc(m.n)}</b>${m.h.toUpperCase()}</span></div>
-    </div>
-    <div class="alts">aussi proche de : ${alts}</div>
-    <div class="modes"><button class="mtab${MODE==='livre'?' on':''}" data-m="livre">Dictionnaire</button><button class="mtab${MODE==='etendu'?' on':''}" data-m="etendu">Harmonies étendues</button></div>
-    <div class="count">${accords.length} accord${accords.length>1?'s':''}<span class="o">${MODE==='etendu'?'livre + harmonies · ':''}pièce en ${ORIENT}</span></div>
-    <div class="carousel">
-      <div class="slides">${accords.map(ac=>`<div class="slide">${comboCardFromIds(ac.ids,top.i,ac.label)}</div>`).join('')}<div class="slide recap"><div class="recap-in"><div class="recapt">Récap</div><p class="recapd">Ta pièce <b>${esc(m.n)}</b> entre dans <b>${accords.length}</b> accord${accords.length>1?'s':''}${MODE==='etendu'?' (dictionnaire + harmonies)':' du dictionnaire'}. Toutes les couleurs compatibles :</p><div class="palette">${palette}</div></div></div></div>
-      <div class="cnav"><button class="btn nav" data-dir="-1" aria-label="précédent">←</button><span class="counter">1 / ${accords.length}</span><button class="btn nav" data-dir="1" aria-label="suivant">→</button></div>
-    </div>`;
-  return html;
-}
-function wireChips(el){el.querySelectorAll('.dchip').forEach(ch=>ch.onclick=()=>{last.idx=+ch.dataset.idx;rerender();});
-  el.querySelectorAll('.mtab').forEach(b=>b.onclick=()=>{MODE=b.dataset.m;rerender();});
-  const sl=el.querySelector('.slides');if(sl){const cnt=el.querySelector('.counter'),N=sl.children.length;
-    el.querySelectorAll('.nav').forEach(b=>b.onclick=()=>sl.scrollBy({left:(+b.dataset.dir)*(sl.clientWidth||320),behavior:'smooth'}));
-    const upd=()=>{const w=sl.clientWidth||1,i=Math.round(sl.scrollLeft/w);cnt.textContent=i>=N-1?'Récap':((i+1)+' / '+(N-1));};
-    sl.addEventListener('scroll',upd);upd();}}
-function rerender(){if(!last||!last.el)return;last.el.innerHTML=buildAnalysisHTML(last.a,last.idx);wireChips(last.el);}
 function syncSeg(){[...document.getElementById('seg').children].forEach(x=>x.classList.toggle('on',x.dataset.o===ORIENT));}
 
-function handleFile(file){
-  if(!file||!file.type.startsWith('image/'))return;
-  const url=URL.createObjectURL(file);
-  add(`<img class="thumb" src="${url}"><div class="cap">ma photo</div>`,true);
-  const img=new Image();
-  img.onload=()=>showPicker(img);
-  img.onerror=()=>add('Image illisible — réessaie.',false);
-  img.src=url;
-}
-
-function showPicker(img){
-  const maxW=360,scale=Math.min(1,maxW/img.width),W=Math.round(img.width*scale),H=Math.round(img.height*scale);
-  const wrap=document.createElement('div');wrap.className='msg';
-  wrap.innerHTML=`<div class="bubble full">
-    <div class="pickwrap"><canvas class="pcanvas" width="${W}" height="${H}"></canvas></div>
-    <div class="pickbar"><span class="phint">👆 touche ton vêtement pour lire sa couleur</span>
-      <button class="btn small" data-auto>🪄 détection auto (IA)</button></div>
-    <div class="analysis"></div></div>`;
-  thread.appendChild(wrap);chat.scrollTop=chat.scrollHeight;
-  const cv=wrap.querySelector('.pcanvas'),ctx=cv.getContext('2d');ctx.drawImage(img,0,0,W,H);
+function renderPicker(img){
+  const maxW=560,scale=Math.min(1,maxW/img.width),W=Math.round(img.width*scale),H=Math.round(img.height*scale);
+  app.innerHTML=`<div class="view picker"><div class="pstage"><canvas class="pcanvas" width="${W}" height="${H}"></canvas></div><div class="pickbar"><span class="phint">👆 touche ton vêtement</span><button class="btn small" id="autoia">🪄 détection auto (IA)</button></div></div>`;
+  const cv=app.querySelector('.pcanvas'),ctx=cv.getContext('2d');ctx.drawImage(img,0,0,W,H);
   const off=document.createElement('canvas');off.width=img.width;off.height=img.height;off.getContext('2d').drawImage(img,0,0);
-  const out=wrap.querySelector('.analysis');
-  function pickAt(cx,cy){
-    const rad=Math.max(4,Math.round(img.width*0.012));
-    const rgb=sampleAvg(off,Math.round(cx/scale),Math.round(cy/scale),rad);
-    ctx.drawImage(img,0,0,W,H);
-    ctx.lineWidth=3;ctx.strokeStyle='#fff';ctx.beginPath();ctx.arc(cx,cy,10,0,7);ctx.stroke();
-    ctx.lineWidth=1.5;ctx.strokeStyle='#0a1230';ctx.beginPath();ctx.arc(cx,cy,12,0,7);ctx.stroke();
-    const a={colors:[{r:rgb.r,g:rgb.g,b:rgb.b,frac:1}],orient:ORIENT,cutoutURL:null};
-    out.innerHTML=buildAnalysisHTML(a,0);last={a,idx:0,el:out};wireChips(out);
-  }
-  function rel(e){const r=cv.getBoundingClientRect();const p=e.touches?e.touches[0]:e;
-    return [(p.clientX-r.left)*cv.width/r.width,(p.clientY-r.top)*cv.height/r.height];}
+  function pickAt(cx,cy){const rad=Math.max(4,Math.round(img.width*0.012));const rgb=sampleAvg(off,Math.round(cx/scale),Math.round(cy/scale),rad);
+    last={a:{colors:[{r:rgb.r,g:rgb.g,b:rgb.b,frac:1}],orient:ORIENT,cutoutURL:null},idx:0};renderResult();}
+  function rel(e){const r=cv.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return [(p.clientX-r.left)*cv.width/r.width,(p.clientY-r.top)*cv.height/r.height];}
   cv.addEventListener('click',e=>{const c=rel(e);pickAt(c[0],c[1]);});
   cv.addEventListener('touchstart',e=>{e.preventDefault();const c=rel(e);pickAt(c[0],c[1]);},{passive:false});
-  wrap.querySelector('[data-auto]').onclick=()=>runAuto(img,out);
+  app.querySelector('#autoia').onclick=()=>runAuto(img);
 }
-
-async function runAuto(img,out){
-  out.innerHTML='<div class="loading2"><span class="spin"></span>chargement du modèle IA… (1er coup ~30-60 s, puis instantané)</div>';
-  try{
-    const seg=await loadModel();
-    const res=await seg(img.src);
-    const a=analyzeFromSeg(res,img);
-    ORIENT=a.orient;syncSeg();
-    out.innerHTML=buildAnalysisHTML(a,0);last={a,idx:0,el:out};wireChips(out);
-  }catch(e){out.innerHTML='<div class="loading2">IA indisponible ('+(e&&e.message||e)+'). Utilise le toucher 👆 (toujours fiable).</div>';}
+async function runAuto(img){
+  const stage=app.querySelector('.pstage');if(stage)stage.innerHTML='<div class="loading2"><span class="spin"></span>chargement du modèle IA…<br>(1er coup ~30-60 s, puis instantané)</div>';
+  try{const seg=await loadModel();const res=await seg(img.src);const a=analyzeFromSeg(res,img);ORIENT=a.orient;syncSeg();last={a,idx:0};renderResult();}
+  catch(e){renderPicker(img);}
 }
+function renderIdle(){
+  app.innerHTML=`<div class="view idle"><div class="big">Touche une couleur, compose ta tenue.</div><div class="sub">Ajoute la photo d'une pièce — je lis sa couleur et je donne tous les accords du dictionnaire de Sanzo Wada (157 couleurs · 348 accords).</div><button class="btn" id="pick2">Ajouter une photo</button></div>`;
+  const p=app.querySelector('#pick2');if(p)p.onclick=()=>document.getElementById('file').click();
+}
+function handleFile(file){if(!file||!file.type.startsWith('image/'))return;const url=URL.createObjectURL(file);
+  const img=new Image();img.onload=()=>renderPicker(img);img.onerror=()=>renderIdle();img.src=url;}
 
 document.getElementById('pick').onclick=()=>document.getElementById('file').click();
 document.getElementById('file').onchange=e=>{handleFile(e.target.files[0]);e.target.value='';};
-
-// toggle haut/bas (réordonne le dernier résultat aussi)
-document.getElementById('seg').addEventListener('click',e=>{
-  const b=e.target.closest('button');if(!b)return;ORIENT=b.dataset.o;syncSeg();rerender();});
+document.getElementById('seg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;ORIENT=b.dataset.o;syncSeg();if(last&&last.a)renderResult();});
 
 const drop=document.getElementById('drop');let dc=0;
 window.addEventListener('dragenter',e=>{e.preventDefault();dc++;drop.classList.add('on');});
@@ -447,7 +429,7 @@ window.addEventListener('dragleave',()=>{dc--;if(dc<=0)drop.classList.remove('on
 window.addEventListener('drop',e=>{e.preventDefault();dc=0;drop.classList.remove('on');if(e.dataTransfer.files[0])handleFile(e.dataTransfer.files[0]);});
 window.addEventListener('paste',e=>{const it=[...((e.clipboardData||{}).items||[])].find(x=>x.type.startsWith('image/'));if(it)handleFile(it.getAsFile());});
 
-add(`Ajoute la <b>photo d'une pièce</b>, puis <b>touche le vêtement</b> dessus : je lis sa couleur et je donne tous les accords du <b>dictionnaire de Sanzo Wada</b> (157 couleurs · 348 accords). Le bouton <b>détection auto (IA)</b> isole le vêtement et devine haut/bas tout seul. La pièce se place en <b>haut</b> ou en <b>bas</b> (sélecteur) pour imaginer le reste de la tenue.`,false);
+renderIdle();
 </script>
 </body>
 </html>
